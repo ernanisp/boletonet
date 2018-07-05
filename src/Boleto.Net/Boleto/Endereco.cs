@@ -104,9 +104,25 @@ namespace BoletoNet
         public string EndComNumero {
             get {
                 if (!string.IsNullOrEmpty(End) && !string.IsNullOrEmpty(Numero))
-                    return string.Format("{0} {1}", End, Numero);
+                    return string.Format("{0}, {1}", End.Trim(), Numero.Trim());
 
                 return End;
+            }
+        }
+
+        public string EndComNumeroEComplemento
+        {
+            get
+            {
+                var endComNumeroEComplemento = End;
+
+                if (!string.IsNullOrEmpty(Numero))
+                    endComNumeroEComplemento += " " + Numero;
+
+                if (!string.IsNullOrEmpty(Complemento))
+                    endComNumeroEComplemento += " " + Complemento;
+
+                return endComNumeroEComplemento;
             }
         }
     }

@@ -157,8 +157,10 @@ namespace BoletoNet
 			detalheRetorno.CodigoInscricao = Utils.ToInt32(registro.Substring(1, 2));
 			detalheRetorno.NumeroInscricao = registro.Substring(3, 14);
 			detalheRetorno.UsoEmpresa = registro.Substring(37, 25);
-			detalheRetorno.NossoNumero = registro.Substring(94, 12);
-			detalheRetorno.NossoNumeroComDV = registro.Substring(94, 13);
+
+            var nossoNumeroLido = registro.Substring(94, 13).Trim();
+            detalheRetorno.NossoNumero = nossoNumeroLido.Substring(0, nossoNumeroLido.Length - 1);
+			detalheRetorno.NossoNumeroComDV = detalheRetorno.NossoNumero + nossoNumeroLido.Substring(nossoNumeroLido.Length -1, 1);
 			detalheRetorno.Carteira = registro.Substring(107, 1);
 			detalheRetorno.CodigoOcorrencia = int.Parse(registro.Substring(108, 2));
 
@@ -276,7 +278,7 @@ namespace BoletoNet
 			detalhe.Append(Utils.FitStringLength(string.Empty, 10, 10, ' ', 0, true, true, false));
 			detalhe.Append(
 				Utils.SubstituiCaracteresEspeciais(
-					Utils.FitStringLength(boleto.Sacado.Endereco.EndComNumero, 40, 40, ' ', 0, true, true, false)));
+					Utils.FitStringLength(boleto.Sacado.Endereco.EndComNumeroEComplemento, 40, 40, ' ', 0, true, true, false)));
 			detalhe.Append(
 				Utils.SubstituiCaracteresEspeciais(
 					Utils.FitStringLength(boleto.Sacado.Endereco.Bairro, 12, 12, ' ', 0, true, true, false)));
