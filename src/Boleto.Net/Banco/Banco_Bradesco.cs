@@ -1027,13 +1027,13 @@ namespace BoletoNet
                 string vInstrucao1 = "00"; //1ª instrução (2, N) Caso Queira colocar um cod de uma instrução. ver no Manual caso nao coloca 00
                 string vInstrucao2 = "00"; //2ª instrução (2, N) Caso Queira colocar um cod de uma instrução. ver no Manual caso nao coloca 00
 
-                foreach (Instrucao instrucao in boleto.Instrucoes)
+                foreach (var instrucao in boleto.Instrucoes)
                 {
                     switch ((EnumInstrucoes_Bradesco)instrucao.Codigo)
                     {
                         case EnumInstrucoes_Bradesco.Protestar:
                             vInstrucao1 = "06"; //Indicar o código “06” - (Protesto)
-                            vInstrucao2 = "00";
+                            vInstrucao2 = Utils.FitStringLength(instrucao.QuantidadeDias.ToString(), 2, 2, '0', 0, true, true, true);
                             break;
                         case EnumInstrucoes_Bradesco.NaoProtestar:
                             vInstrucao1 = "00";
@@ -1238,16 +1238,16 @@ namespace BoletoNet
                 }
 
                 //Data limite para concessão de Desconto 2 ==> 322 a 327
-                _detalhe += new string(' ', 6);
+                _detalhe += new string('0', 6);
 
                 //Valor do Desconto - 328 a 340
-                _detalhe += new string(' ', 13);
+                _detalhe += new string('0', 13);
 
                 //Data limite para concessão de Desconto 3 - 341 a 346
-                _detalhe += new string(' ', 6);
+                _detalhe += new string('0', 6);
 
                 //Valor do Desconto - 347 a 359
-                _detalhe += new string(' ', 13);
+                _detalhe += new string('0', 13);
 
                 //Reserva - 360 a 366
                 _detalhe += new string(' ', 7);
