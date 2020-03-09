@@ -202,9 +202,9 @@ namespace BoletoNet
         public override void ValidaBoleto(Boleto boleto)
         {
             //throw new NotImplementedException("Função não implementada.");
-            if (!((boleto.Carteira == "102") || (boleto.Carteira == "101") || (boleto.Carteira == "201")))
+            if (!((boleto.Carteira == "102") || (boleto.Carteira == "101") || (boleto.Carteira == "201") || (boleto.Carteira == "501")))
             {
-                string exceptionMessage = String.Format("A carteira '{0}' não foi implementada. Carteiras válidas: 101, 102 e 201.", boleto.Carteira);
+                string exceptionMessage = String.Format("A carteira '{0}' não foi implementada. Carteiras válidas: 101, 102, 201 e 501.", boleto.Carteira);
                 throw new NotImplementedException(exceptionMessage);
             }
 
@@ -1082,18 +1082,27 @@ namespace BoletoNet
                     _segmentoR += "000000000000000000000000"; //24 zeros
                 }
 
+                _segmentoR += "                        "; //24 zeros - comentário abaixo
+
+                #region ::. Deprecado .::
+
+                //Adriano - 06/02/2020
+                //De acordo com validação com o Santander, este campo deve ter 24 posições em branco
+
                 //Suelton - 14/12/2018 - Implementação do 3 desconto por antecipação
-                if (boleto.DataDescontoAntecipacao3.HasValue && boleto.ValorDescontoAntecipacao3.HasValue)
-                {
-                    _segmentoR += "1" + //'1' = Valor Fixo Até a Data Informada
-                        Utils.FitStringLength(boleto.DataDescontoAntecipacao3.Value.ToString("ddMMyyyy"), 8, 8, '0', 0, true, true, false) +
-                        Utils.FitStringLength(boleto.ValorDescontoAntecipacao3.ApenasNumeros(), 15, 15, '0', 0, true, true, true);
-                }
-                else
-                {
-                    // Desconto 3
-                    _segmentoR += "000000000000000000000000"; //24 zeros
-                }
+                //if (boleto.DataDescontoAntecipacao3.HasValue && boleto.ValorDescontoAntecipacao3.HasValue)
+                //{
+                //    _segmentoR += "1" + //'1' = Valor Fixo Até a Data Informada
+                //                  Utils.FitStringLength(boleto.DataDescontoAntecipacao3.Value.ToString("ddMMyyyy"), 8, 8, '0', 0, true, true, false) +
+                //                  Utils.FitStringLength(boleto.ValorDescontoAntecipacao3.ApenasNumeros(), 15, 15, '0', 0, true, true, true);
+                //}
+                //else
+                //{
+                //    // Desconto 3
+                //    _segmentoR += "000000000000000000000000"; //24 zeros
+                //}
+
+                #endregion
 
                 #region Deprecado
                 //Com a implementação dos campo descontos 2 e 3 não é mais recomendado utilizar o campo outros descontos
