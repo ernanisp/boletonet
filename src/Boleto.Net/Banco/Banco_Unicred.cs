@@ -94,7 +94,7 @@ namespace BoletoNet
 
             try
             {
-                boleto.NossoNumero = string.Format("{0}-{1}", nossoNumero, Mod11UniCred(nossoNumero));
+                boleto.NossoNumero = string.Format("{0}-{1}", nossoNumero, Mod11UniCred(nossoNumero, false));
             }
             catch (Exception ex)
             {
@@ -121,12 +121,20 @@ namespace BoletoNet
             int d2 = Mod10Unicred(campo2);
             campo2 = FormataCampoLD(campo2) + d2.ToString();
 
-            string campo3 = boleto.CodigoBarra.Codigo.Substring(34, 10);
+            string NossoNumLinhaDigitavel = string.Format("{0}{1}", boleto.NossoNumero, Mod11UniCred(boleto.NossoNumero, false));
+            string campo3 = NossoNumLinhaDigitavel.Substring(NossoNumLinhaDigitavel.Length-10, 10);
+            //A linha digitável nao pode usar a regra de cálculo do DV do barcode pois lá o nosso numero usa uma regra diferente para o DV
+            //string campo3 = boleto.CodigoBarra.Codigo.Substring(34, 10);
             int d3 = Mod10Unicred(campo3);
             campo3 = FormataCampoLD(campo3) + d3.ToString();
 
-            string campo4 = boleto.CodigoBarra.Codigo.Substring(4, 1);
-
+            string cmp_livre = Utils.FormatCode(boleto.Cedente.ContaBancaria.Agencia, 4) +
+                                    Utils.FormatCode(boleto.Cedente.ContaBancaria.Conta, 10) +
+                                    Utils.FormatCode(NossoNumLinhaDigitavel, 11);
+            string campo4 = DigUnicred(cmp_livre).ToString();
+            //A linha digitável nao pode usar a regra de cálculo do DV do barcode pois lá o nosso numero usa uma regra diferente para o DV
+            //string campo4 = boleto.CodigoBarra.Codigo.Substring(4, 1);
+            
             string campo5 = boleto.CodigoBarra.Codigo.Substring(5, 14);
 
             boleto.CodigoBarra.LinhaDigitavel = campo1 + "  " + campo2 + "  " + campo3 + "  " + campo4 + "  " + campo5;
@@ -141,7 +149,7 @@ namespace BoletoNet
             string valorBoleto = boleto.ValorBoleto.ToString("f").Replace(",", "").Replace(".", "");
             valorBoleto = Utils.FormatCode(valorBoleto, 10);
 
-            var nossoNumero = string.Format("{0}{1}", boleto.NossoNumero, Mod11UniCred(boleto.NossoNumero));
+            var nossoNumero = string.Format("{0}{1}", boleto.NossoNumero, Mod11UniCred(boleto.NossoNumero, true));
             string cmp_livre = Utils.FormatCode(boleto.Cedente.ContaBancaria.Agencia, 4) +
                                                 Utils.FormatCode(boleto.Cedente.ContaBancaria.Conta, 10) +
                                                 Utils.FormatCode(nossoNumero, 11);
@@ -160,7 +168,9 @@ namespace BoletoNet
             if (_dacBoleto == 0 || _dacBoleto > 9)
                 _dacBoleto = 1;
 
-            boleto.CodigoBarra.Codigo = GerarCodigoDeBarras(boleto, valorBoleto, cmp_livre, dv_cmpLivre, _dacBoleto);
+            //Estava gerando com 46 digitos ao invés de 44, então tirei o dv_cmpLivre para corrigir.
+            //boleto.CodigoBarra.Codigo = GerarCodigoDeBarras(boleto, valorBoleto, cmp_livre, dv_cmpLivre, _dacBoleto);
+            boleto.CodigoBarra.Codigo = GerarCodigoDeBarras(boleto, valorBoleto, cmp_livre, string.Empty, _dacBoleto);
         }
 
         private string GerarCodigoDeBarras(Boleto boleto, string valorBoleto, string cmp_livre, string dv_cmpLivre, int? dv_geral = null)
@@ -273,7 +283,7 @@ namespace BoletoNet
             return d1 + d2;
         }
 
-        protected static int Mod11UniCred(string seq)
+        protected static int Mod11UniCred(string seq, bool ehBarcode)
         {
             /* Variaveis
              * -------------
@@ -295,8 +305,17 @@ namespace BoletoNet
             }
 
             d = 11 - (s % 11);
-            if (d == 0 || d == 10)
-                d = 0;
+            if (ehBarcode)
+            {
+                if (d == 0 || d >= 10)
+                    d = 1;
+            }
+            else
+            {
+                if (d == 0 || d >= 10)
+                    d = 0;
+            }
+
             return d;
         }
 
